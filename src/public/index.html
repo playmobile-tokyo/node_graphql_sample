@@ -1,0 +1,66 @@
+ <html lang="ja">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   <title>Document</title>
+ </head>
+ <body>
+
+   <select name="" id="field">
+     <option value="-">-</option>
+     <option value="author">author</option>
+   </select>
+   <input type="text" name="" id="search">
+   <button onclick="searchBook()">検索</button>
+
+   <ul id="booklist"></ul>
+
+
+   <script>
+     const searchBook = () => {
+       const field = document.getElementById('field').value
+       const conditions = document.getElementById('search').value
+       let data;
+       if(conditions && field !== '-') {
+         data = `
+           {
+             books(${field}: "${conditions}") {
+               name
+             }
+           }
+         `
+       }else {
+         data = `
+           {
+             books {
+               name
+               author
+             }
+           }
+         `
+       }
+
+       let url = 'http://localhost:8080/graphql?query='
+       fetch(url + encodeURIComponent(data), {
+         method: 'POST',
+       }).then(response => response.json())
+       .then(result => {
+         const bookslist = document.getElementById('booklist')
+         bookslist.textContent = null;
+
+         const books = Array.from(result.data.books)
+         books.map((book) => {
+           const li = document.createElement('li')
+           const items = Object.keys(book)
+           items.map((item) => {
+             li.innerText += `${item}: ${book[item]}, `
+           })
+           bookslist.appendChild(li)
+         })
+       })
+     }
+
+   </script>
+ </body>
+ </html>

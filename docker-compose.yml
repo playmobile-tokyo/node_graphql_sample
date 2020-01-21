@@ -1,0 +1,44 @@
+version: '3'
+services:
+  gql_app:
+    image: node:12.14.1-stretch-slim
+    tty: true
+    ports:
+      - 8080:8080
+      - 9229:9229
+    volumes:
+      - ./src:/src
+    working_dir: /src
+    tty: true
+    networks:
+      - gql_internal_network
+    depends_on: 
+      - gql_db
+  gql_db:
+    image: mysql:8.0.18
+    volumes:
+      - gql-db-store:/var/lib/mysql
+      - ./mysql/log:/var/log/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    env_file:
+      - ./mysql/.env
+    environment:
+      - MYSQL_DATABASE=gqldb
+      - MYSQL_USER=dbreader
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+      - TZ=Asia/Tokyo
+#      - MYSQL_DATABASE=${DB_NAME}
+#      - MYSQL_USER=${DB_USER}
+#      - MYSQL_PASSWORD=${DB_PASS}
+#      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+#      - TZ=${TZ}
+    ports:
+      - 23306:3306
+    networks:
+      - gql_internal_network
+volumes:
+  gql-db-store:
+networks:
+  gql_internal_network:
+    # docker run --name bks-mysql -e MYSQL_ROOT_PASSWORD=my-root -d mysql:8.0.18
